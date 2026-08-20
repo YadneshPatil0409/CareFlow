@@ -1,0 +1,9 @@
+package com.example.demo.exception;
+
+public class EmailAlreadyExistsException {
+
+	public EmailAlreadyExistsException(String message) {
+        super(message);
+    }
+	
+}

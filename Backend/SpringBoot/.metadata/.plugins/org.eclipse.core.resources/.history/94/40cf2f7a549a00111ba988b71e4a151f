@@ -1,0 +1,80 @@
+package com.example.demo.controller;
+
+package com.hms.identity.service;
+
+import com.hms.identity.dto.UserRegisterRequest;
+import com.hms.identity.dto.UserResponse;
+import com.hms.identity.entity.User;
+import com.hms.identity.exception.EmailAlreadyExistsException;
+import com.hms.identity.repository.UserRepository;
+import com.hms.identity.service.impl.UserServiceImpl;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+class UserServiceTest {
+
+    @Mock
+    private UserRepository userRepository;
+
+    @InjectMocks
+    private UserServiceImpl userService;
+
+    private UserRegisterRequest validRequest;
+    private User user;
+
+    @BeforeEach
+    void setUp() {
+        validRequest = UserRegisterRequest.builder()
+                .name("Alice Smith")
+                .email("alice@hms.com")
+                .password("Password123!")
+                .phone("+1234567890")
+                .build();
+
+        user = User.builder()
+                .id(1L)
+                .name("Alice Smith")
+                .email("alice@hms.com")
+                .password("Password123!")
+                .phone("+1234567890")
+                .status("ACTIVE")
+                .build();
+    }
+
+    @Test
+    void registerUser_Success() {
+        // Given (Arrange)
+        when(userRepository.existsByEmail(validRequest.getEmail())).thenReturn(false);
+        when(userRepository.save(any(User.class))).thenReturn(user);
+
+        // When (Act)
+        UserResponse response = userService.registerUser(validRequest);
+
+        // Then (Assert)
+        assertNotNull(response);
+        assertEquals("Alice Smith", response.getName());
+        assertEquals("alice@hms.com", response.getEmail());
+        verify(userRepository, times(1)).save(any(User.class));
+    }
+
+    @Test
+    void registerUser_DuplicateEmail_ThrowsException() {
+        // Given (Arrange)
+        when(userRepository.existsByEmail(validRequest.getEmail())).thenReturn(true);
+
+        // When & Then (Act & Assert)
+        assertThrows(EmailAlreadyExistsException.class, () -> userService.registerUser(validRequest));
+        verify(userRepository, never()).save(any(User.class));
+    }
+}

@@ -1,0 +1,32 @@
+package com.example.demo.dto;
+
+
+import jakarta.validation.constraints.*;
+import lombok.*;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class UserRegisterRequest {
+	
+	@NotBlank(message = "Name is required")
+    @Size(min = 2, max = 100, message = "Name must be between 2 and 100 characters")
+    private String name;
+    
+	@NotBlank(message = "Email is required")
+    @Email(message = "Please provide a valid email address")
+    private String email;
+    
+	@NotBlank(message = "Password is required")
+    @Size(min = 8, message = "Password must be at least 8 characters long")
+    private String password;
+    
+	@Pattern(regexp = "^\\+?[0-9]{10,15}$", message = "Phone number must be between 10 and 15 digits")
+    private String phone;
+	
+	
+    
+    
+}
