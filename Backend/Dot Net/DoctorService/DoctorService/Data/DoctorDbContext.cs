@@ -1,4 +1,4 @@
-﻿using DoctorService.Models;
+using DoctorService.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace DoctorService.Data;
@@ -13,6 +13,9 @@ public class DoctorDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
+        // ==========================================
+        // 1. DOCTOR ENTITY CONFIGURATION (UNTOUCHED)
+        // ==========================================
         modelBuilder.Entity<Doctor>(entity =>
         {
             entity.ToTable("doctors");
@@ -22,7 +25,6 @@ public class DoctorDbContext : DbContext
             entity.Property(e => e.Id)
                   .HasColumnName("id")
                   .ValueGeneratedOnAdd(); // BIGINT AUTO_INCREMENT
-
 
             // Map Column Names to snake_case
             entity.Property(e => e.UserId).HasColumnName("user_id").IsRequired();
@@ -36,7 +38,6 @@ public class DoctorDbContext : DbContext
             entity.Property(e => e.ConsultationFee).HasColumnName("consultation_fee").HasPrecision(10, 2);
             entity.Property(e => e.IsActive).HasColumnName("is_active").HasDefaultValue(true);
 
-
             // FIX: Explicitly set ColumnType to timestamp for CURRENT_TIMESTAMP compatibility
             entity.Property(e => e.CreatedAt)
                   .HasColumnName("created_at")
@@ -47,8 +48,6 @@ public class DoctorDbContext : DbContext
                   .HasColumnName("updated_at")
                   .HasColumnType("timestamp")
                   .HasDefaultValueSql("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP");
-
         });
     }
-
 }

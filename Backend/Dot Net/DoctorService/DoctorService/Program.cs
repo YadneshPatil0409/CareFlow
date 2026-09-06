@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using System.Text;
 using DoctorService.Data;
 using DoctorService.DTOs;
@@ -62,7 +63,8 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = !string.IsNullOrEmpty(jwtAudience),
         ValidAudience = jwtAudience,
         ValidateLifetime = true,
-        ClockSkew = TimeSpan.Zero
+        ClockSkew = TimeSpan.Zero,
+        RoleClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
     };
 });
 
@@ -144,7 +146,48 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors("AllowFrontend");
 
-app.UseAuthentication(); // Must come BEFORE UseAuthorization
+app.UseAuthentication();
+app.Use(async (context, next) =>
+{
+    Console.WriteLine();
+    Console.WriteLine("========================================");
+    Console.WriteLine("     DOCTOR SERVICE AUTH DEBUG");
+    Console.WriteLine("========================================");
+
+    Console.WriteLine(
+        "IsAuthenticated: " +
+        context.User.Identity?.IsAuthenticated
+    );
+
+    Console.WriteLine(
+        "Name: " +
+        context.User.Identity?.Name
+    );
+
+    Console.WriteLine(
+        "Is Admin: " +
+        context.User.IsInRole("ROLE_ADMIN")
+    );
+
+    Console.WriteLine(
+        "Is Doctor: " +
+        context.User.IsInRole("ROLE_DOCTOR")
+    );
+
+    Console.WriteLine("---------- ALL CLAIMS ----------");
+
+    foreach (var claim in context.User.Claims)
+    {
+        Console.WriteLine(
+            $"Type = {claim.Type}, Value = {claim.Value}"
+        );
+    }
+
+    Console.WriteLine("========================================");
+    Console.WriteLine();
+
+    await next();
+});
 app.UseAuthorization();
 
 app.MapControllers();
